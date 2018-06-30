@@ -245,28 +245,28 @@ void Grid::DisplayBoard() {
     cout << "\n";
   }
 
-  for (int y = 1; y != board_size + 1; y++) {
-    if (y == cursor_y + 1) {
-      cout << "\033[7m" << y << "\033[0m\t";
+  for (int y = 0; y != board_size; y++) {
+    if (y == cursor_y) {
+      cout << "\033[7m" << y + 1 << "\033[0m\t";
     } else {
-      cout << y << "\t";
+      cout << y + 1 << "\t";
     }
-    for (int x = 1; x != board_size + 1; x++) {
-      if ((y == cursor_y + 1) && (x == cursor_x + 1)) {
+    for (int x = 0; x != board_size; x++) {
+      if ((y == cursor_y) && (x == cursor_x)) {
         cout << "\033[7m";
       }
-      if (GetDigit(board[x - 1][y - 1], 3)) {
+      if (GetDigit(board[x][y], 3)) {
         cout << "+";
-      } else if (!(GetDigit(board[x - 1][y - 1], 2))) {
+      } else if (!(GetDigit(board[x][y], 2))) {
         cout << "-";
-      } else if (GetDigit(board[x - 1][y - 1], 1)) {
+      } else if (GetDigit(board[x][y], 1)) {
         cout << "*";
-      } else if (GetDigit(board[x - 1][y - 1], 0)) {
-        cout << GetDigit(board[x - 1][y - 1], 0);
+      } else if (GetDigit(board[x][y], 0)) {
+        cout << GetDigit(board[x][y], 0);
       } else {
         cout << " ";
       }
-      if ((y == cursor_y + 1) && (x == cursor_x + 1)) {
+      if ((y == cursor_y) && (x == cursor_x)) {
         cout << "\033[0m";
       }
       cout << " ";
