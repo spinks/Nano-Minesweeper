@@ -8,8 +8,8 @@ Requires C++11.
 
 ### Gameplay
 
-Move cursor around, and then enter action (f to flag,
-anything else to reveal (ie. enter, r, ect.))
-
+Move cursor around, and then enter action ('f' to flag,
+anything else to reveal (ie. enter, 'r', ect.)) At any point entering 'c' will
+cancel the current action.
 
 <img src="./Images/display.png" title="gameplay" width="328" height="344">

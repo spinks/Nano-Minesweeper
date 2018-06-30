@@ -15,17 +15,17 @@ using std::string;
 using std::vector;
 
 class Grid {
-public:
+ public:
   Grid();
 
-private:
+ private:
   bool game_over = false, game_won = false, mines_created = false,
        first_display = true;
   int board_size = 16, num_flags = 0, num_revealed = 0, num_mines = 40;
   int cursor_x = 0, cursor_y = 0;
   vector<vector<int>> board;
   void GameSequence();
-  bool Prompt();
+  int Prompt();
   int IntPrompt();
   void Mines(bool protect);
   void Reveal(int x, int y);
@@ -43,30 +43,32 @@ Grid::Grid() : board(board_size, vector<int>(board_size, 0)) { GameSequence(); }
 
 void Grid::GameSequence() {
   DisplayBoard();
-  bool reveal = Prompt();
+  int reveal = Prompt();
   // create mines on first turn
-  if (!mines_created) {
-    if (reveal) {
-      Mines(true);
-    } else {
-      Mines(false);
+  if (reveal != 2) {
+    if (!mines_created) {
+      if (reveal) {
+        Mines(true);
+      } else {
+        Mines(false);
+      }
     }
-  }
-  if (!reveal) {
-    if (!(GetDigit(board[cursor_x][cursor_y], 3))) {
-      AddDigit(board[cursor_x][cursor_y], 3, 1);
-      num_flags++;
-    } else {
-      AddDigit(board[cursor_x][cursor_y], 3, -1);
-      num_flags--;
+    if (!reveal) {
+      if (!(GetDigit(board[cursor_x][cursor_y], 3))) {
+        AddDigit(board[cursor_x][cursor_y], 3, 1);
+        num_flags++;
+      } else {
+        AddDigit(board[cursor_x][cursor_y], 3, -1);
+        num_flags--;
+      }
+    } else if (!(GetDigit(board[cursor_x][cursor_y], 3)) &&
+               !(GetDigit(board[cursor_x][cursor_y], 2))) {
+      Reveal(cursor_x, cursor_y);
     }
-  } else if (!(GetDigit(board[cursor_x][cursor_y], 3)) &&
-             !(GetDigit(board[cursor_x][cursor_y], 2))) {
-    Reveal(cursor_x, cursor_y);
-  }
-  if (num_revealed == (board_size * board_size) - num_mines) {
-    game_over = true;
-    game_won = true;
+    if (num_revealed == (board_size * board_size) - num_mines) {
+      game_over = true;
+      game_won = true;
+    }
   }
   DisplayBoard();
   if (game_over) {
@@ -76,15 +78,25 @@ void Grid::GameSequence() {
   }
 }
 
-bool Grid::Prompt() {
+int Grid::Prompt() {
   // change x cursor location and redraw
   cout << "x -> ";
-  cursor_x = IntPrompt() - 1;
+  int response = IntPrompt();
+  if (response == -1) {
+    cout << "\n";
+    return 2;
+  }
+  cursor_x = response - 1;
   DisplayBoard();
 
   // change y cursor location and redraw
   cout << "y -> ";
-  cursor_y = IntPrompt() - 1;
+  response = IntPrompt();
+  if (response == -1) {
+    cout << "\n";
+    return 2;
+  }
+  cursor_y = response - 1;
   DisplayBoard();
 
   // get action and return to gamesequence
@@ -93,9 +105,11 @@ bool Grid::Prompt() {
   getline(cin, action);
   cout << "\n";
   if (action == "f") {
-    return false;
+    return 0;
+  } else if (action == "c") {
+    return 2;
   } else {
-    return true;
+    return 1;
   }
 }
 
@@ -104,6 +118,7 @@ int Grid::IntPrompt() {
   int value;
   do {
     getline(cin, line);
+    if (line == "c") return -1;
     try {
       value = stoi(line);
     } catch (...) {
@@ -187,9 +202,7 @@ void Grid::DisplayBoard() {
   // Redraw
   int stack_height = std::to_string(board_size).length();
   int rows_up = board_size + stack_height + 3;
-  if (game_over) {
-    rows_up++;
-  }
+  if (game_over) rows_up++;
   if (!first_display) {
     for (int i = 0; i != rows_up; i++) {
       cout << "\033[F\33[2K";
@@ -211,14 +224,10 @@ void Grid::DisplayBoard() {
   // Col headers
   for (int s = stack_height; s != 0; s--) {
     int magnitude = pow(10, (s - 1));
-    if (magnitude == 1) {
-      cout << "Ix.";
-    }
+    if (magnitude == 1) cout << "Ix.";
     cout << "\t";
     for (int x = 1; x != board_size + 1; x++) {
-      if (x == cursor_x + 1) {
-        cout << "\033[7m";
-      }
+      if (x == cursor_x + 1) cout << "\033[7m";
       if ((x) >= magnitude) {
         if (magnitude == 1) {
           cout << x % 10;
@@ -229,9 +238,7 @@ void Grid::DisplayBoard() {
         cout << "\033[0m"
              << " ";
       }
-      if (x == cursor_x + 1) {
-        cout << "\033[0m";
-      }
+      if (x == cursor_x + 1) cout << "\033[0m";
       // col seperator
       cout << " ";
     }
