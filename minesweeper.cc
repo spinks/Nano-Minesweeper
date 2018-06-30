@@ -180,6 +180,9 @@ void Grid::DisplayBoard() {
   // Redraw
   int stack_height = std::to_string(board_size).length();
   int rows_up = board_size + stack_height + 3;
+  if (game_over) {
+    rows_up++;
+  }
   if (!first_display) {
     for (int i = 0; i != rows_up; i++) {
       cout << "\033[F\33[2K";
