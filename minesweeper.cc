@@ -9,6 +9,7 @@
 using std::cin;
 using std::cout;
 using std::default_random_engine;
+using std::getline;
 using std::pair;
 using std::string;
 using std::vector;
@@ -88,10 +89,10 @@ bool Grid::Prompt() {
 
   // get action and return to gamesequence
   cout << "Action (f = flag, !f = reveal)-> ";
-  char action;
-  cin >> action;
+  string action;
+  getline(cin, action);
   cout << "\n";
-  if (action == 'f') {
+  if (action == "f") {
     return false;
   } else {
     return true;
@@ -99,13 +100,19 @@ bool Grid::Prompt() {
 }
 
 int Grid::IntPrompt() {
+  string line;
   int value;
   do {
-    while (!(cin >> value)) {
-      cin.clear();
-      cin.ignore(256, '\n');
+    getline(cin, line);
+    try {
+      value = stoi(line);
+    } catch (...) {
+      value = -1;
     }
-  } while ((value < 0) || (value > 16));
+    if ((value < 0) || (value > board_size)) {
+      cout << "\033[F\033[5C\033[K";
+    }
+  } while ((value < 0) || (value > board_size));
   return value;
 }
 
