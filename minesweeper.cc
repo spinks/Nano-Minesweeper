@@ -46,9 +46,7 @@ void Grid::GameSequence() {
   int reveal = Prompt();
   // create mines on first turn
   if (reveal != 2) {  // if not cancel
-    if (!mines_created) {
-      reveal ? Mines(true) : Mines(false);  // protect if reveal, dont if flag
-    }
+    if (!mines_created) (reveal ? Mines(true) : Mines(false));
     if (!reveal) {  // if flag
       int flag_change = (GetDigit(board[cursor_x][cursor_y], 3) ? -1 : 1);
       AddDigit(board[cursor_x][cursor_y], 3, flag_change);
@@ -103,10 +101,10 @@ int Grid::IntPrompt() {
     } catch (...) {
       value = -1;
     }
-    if ((value < 0) || (value > board_size)) {
+    if ((value < 1) || (value > board_size)) {
       cout << "\033[F\033[5C\033[K";
     }
-  } while ((value < 0) || (value > board_size));
+  } while ((value < 1) || (value > board_size));
   return value;
 }
 
@@ -190,13 +188,12 @@ void Grid::DisplayBoard() {
   // Header
   cout << "Mines: " << num_mines - num_flags;
   if (game_won) {
-    cout << "\t :)";
+    cout << "\t :)\n";
   } else if (game_over) {
-    cout << "\t :(";
+    cout << "\t :(\n";
   } else {
-    cout << "\t :|";
+    cout << "\t :|\n";
   }
-  cout << "\n";
 
   // Col headers
   for (int s = stack_height; s != 0; s--) {
@@ -222,11 +219,9 @@ void Grid::DisplayBoard() {
   }
 
   for (int y = 0; y != board_size; y++) {
-    if (y == cursor_y) {
-      cout << "\033[7m" << y + 1 << "\033[0m\t";
-    } else {
-      cout << y + 1 << "\t";
-    }
+    if (y == cursor_y) cout << "\033[7m";
+    cout << y + 1 << "\t";
+    if (y == cursor_y) cout << "\033[0m";
     for (int x = 0; x != board_size; x++) {
       if ((y == cursor_y) && (x == cursor_x)) cout << "\033[7m";  // highlight
       if (GetDigit(board[x][y], 3)) {
