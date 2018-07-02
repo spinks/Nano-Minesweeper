@@ -39,12 +39,15 @@ int main() {
   return 0;
 }
 
-Grid::Grid() : board(board_size, vector<int>(board_size, 0)) { GameSequence(); }
+Grid::Grid() : board(board_size, vector<int>(board_size, 0)) {
+  do {
+    GameSequence();
+  } while (!game_over);
+}
 
 void Grid::GameSequence() {
   DisplayBoard();
   int reveal = Prompt();
-  // create mines on first turn
   if (reveal != 2) {  // if not cancel
     if (!mines_created) (reveal ? Mines(true) : Mines(false));
     if (!reveal) {  // if flag
@@ -59,9 +62,7 @@ void Grid::GameSequence() {
       game_over = game_won = true;
     }
   }
-  DisplayBoard();
-  if (game_over) return;
-  GameSequence();
+  if (game_over) DisplayBoard();
 }
 
 int Grid::Prompt() {
@@ -82,7 +83,6 @@ int Grid::Prompt() {
   cout << "Action (f = flag, !f = reveal)-> ";
   string action;
   getline(cin, action);
-  cout << "\n";
   if (action == "c") return 2;
   return (action == "f" ? 0 : 1);
 }
@@ -92,10 +92,7 @@ int Grid::IntPrompt() {
   int value;
   do {
     getline(cin, line);
-    if (line == "c") {
-      cout << "\n";
-      return -1;
-    }
+    if (line == "c") return -1;
     try {
       value = stoi(line);
     } catch (...) {
@@ -176,7 +173,7 @@ inline int Grid::GetDigit(const int &value, int digit) {
 void Grid::DisplayBoard() {
   int stack_height = std::to_string(board_size).length();
   if (!first_display) {  // Redraw
-    int rows_up = board_size + stack_height + (game_over ? 4 : 3);
+    int rows_up = board_size + stack_height + 3;
     for (int i = 0; i != rows_up; i++) {
       cout << "\033[F\33[2K";
     }
