@@ -6,13 +6,7 @@
 #include <utility>
 #include <vector>
 
-using std::cin;
 using std::cout;
-using std::default_random_engine;
-using std::getline;
-using std::pair;
-using std::string;
-using std::vector;
 
 class Grid {
  public:
@@ -21,9 +15,9 @@ class Grid {
  private:
   bool game_over = false, game_won = false, mines_created = false,
        first_display = true;
-  int board_size = 16, num_flags = 0, num_revealed = 0, num_mines = 40;
-  int cursor_x = 0, cursor_y = 0;
-  vector<vector<int>> board;
+  int board_size = 16, num_flags = 0, num_revealed = 0, num_mines = 40,
+      cursor_x = 0, cursor_y = 0;
+  std::vector<std::vector<int>> board;
   void GameSequence();
   int Prompt();
   int IntPrompt();
@@ -39,7 +33,7 @@ int main() {
   return 0;
 }
 
-Grid::Grid() : board(board_size, vector<int>(board_size, 0)) {
+Grid::Grid() : board(board_size, std::vector<int>(board_size, 0)) {
   do {
     GameSequence();
   } while (!game_over);
@@ -81,18 +75,18 @@ int Grid::Prompt() {
   DisplayBoard();
 
   cout << "Action (f = flag, !f = reveal)-> ";
-  string action;
-  getline(cin, action);
+  std::string action;
+  std::getline(std::cin, action);
   if (action == "c") return 2;
   return (action == "f" ? 0 : 1);
 }
 
 int Grid::IntPrompt() {
-  string line;
+  std::string line;
   int value;
   do {
-    getline(cin, line);
-    if (line == "c") return -1;
+    std::getline(std::cin, line);
+    if (line == "c") return -1;  // cancelled int input
     try {
       value = stoi(line);
     } catch (...) {
@@ -107,7 +101,7 @@ int Grid::IntPrompt() {
 
 void Grid::Mines(bool protect) {
   mines_created = true;
-  vector<pair<int, int>> locations;
+  std::vector<std::pair<int, int>> locations;
   for (int x = 0; x != board_size; x++) {
     for (int y = 0; y != board_size; y++) {
       if (protect) {
@@ -120,7 +114,8 @@ void Grid::Mines(bool protect) {
       }
     }
   }
-  shuffle(locations.begin(), locations.end(), default_random_engine(time(0)));
+  shuffle(locations.begin(), locations.end(),
+          std::default_random_engine(time(0)));
   for (int i = 0; i != num_mines; i++) {
     const int &x = locations.back().first, &y = locations.back().second;
     AddDigit(board[x][y], 1, 1);
