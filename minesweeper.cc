@@ -137,24 +137,23 @@ void Grid::Mines(bool protect) {
 }
 
 void Grid::Reveal(int x, int y, bool flood) {
-  if (!(GetDigit(board[x][y], 2))) {  // if not already revealed
-    AddDigit(board[x][y], 2, 1);
-    num_revealed++;
-    if (GetDigit(board[x][y], 1)) {  // if pressed on mine
-      game_over = true;
-      for (int i = 0; i != board_size; i++) {
-        for (int j = 0; j != board_size; j++) {
-          Reveal(i, j, false);
-        }
+  if (GetDigit(board[x][y], 2)) return;
+  AddDigit(board[x][y], 2, 1);
+  num_revealed++;
+  if ((GetDigit(board[x][y], 1)) && flood) {  // if pressed on mine
+    game_over = true;
+    for (int i = 0; i != board_size; i++) {
+      for (int j = 0; j != board_size; j++) {
+        Reveal(i, j, false);
       }
     }
-    if (((GetDigit(board[x][y], 0)) == 0) && flood) {
-      for (int x_off = -1; x_off != 2; x_off++) {
-        for (int y_off = -1; y_off != 2; y_off++) {
-          if ((x + x_off < board_size) && (x + x_off >= 0) &&
-              (y + y_off < board_size) && (y + y_off >= 0)) {
-            Reveal(x + x_off, y + y_off, true);
-          }
+  }
+  if (((GetDigit(board[x][y], 0)) == 0) && flood) {
+    for (int x_off = -1; x_off != 2; x_off++) {
+      for (int y_off = -1; y_off != 2; y_off++) {
+        if ((x + x_off < board_size) && (x + x_off >= 0) &&
+            (y + y_off < board_size) && (y + y_off >= 0)) {
+          Reveal(x + x_off, y + y_off, true);
         }
       }
     }
