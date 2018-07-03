@@ -191,18 +191,10 @@ void Grid::DisplayBoard() {
     cout << "\t";
     for (int x = 1; x != board_size + 1; x++) {
       if (x == cursor_x + 1) cout << "\033[7m";
-      if (x >= magnitude) {
-        if (magnitude == 1) {
-          cout << x % 10;
-        } else {
-          cout << (x / magnitude) % magnitude;
-        }
-      } else {
-        if (x == cursor_x + 1) cout << "\033[0m";
-        cout << " ";  // empty space if below magnitude
-      }
-      if (x == cursor_x + 1) cout << "\033[0m";
-      cout << " ";  // col seperator
+      x >= pow(10, s)
+          ? cout << (GetDigit(x, s))
+          : (x == cursor_x + 1 ? (cout << "\033[0m ") : (cout << " "));
+      x == cursor_x + 1 ? (cout << "\033[0m ") : (cout << " ");
     }
     cout << "\n";
   }
