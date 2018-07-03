@@ -22,7 +22,7 @@ class Grid {
   int Prompt();
   int IntPrompt();
   void Mines(bool protect);
-  void Reveal(int x, int y, bool flood);
+  void Reveal(int x, int y);
   inline void AddDigit(int &value, int digit, int add_value);
   inline int GetDigit(const int &value, int digit);
   void DisplayBoard();
@@ -50,7 +50,7 @@ void Grid::GameSequence() {
     num_flags += flag_change;
   } else if (!(GetDigit(board[cursor_x][cursor_y], 3)) &&
              !(GetDigit(board[cursor_x][cursor_y], 2))) {
-    Reveal(cursor_x, cursor_y, true);
+    Reveal(cursor_x, cursor_y);
   }
   if (num_revealed == (board_size * board_size) - num_mines) {
     game_over = game_won = true;
@@ -91,24 +91,20 @@ int Grid::IntPrompt() {
 }
 
 void Grid::Mines(bool protect) {
+  if (mines_created) return;
   mines_created = true;
-  std::vector<std::pair<int, int>> locations;
+  std::vector<std::pair<int, int>> p_locs;
   for (int x = 0; x != board_size; x++) {
     for (int y = 0; y != board_size; y++) {
-      if (protect) {
-        if (!((x >= cursor_x - 1) && (x <= cursor_x + 1) &&
-              (y >= cursor_y - 1) && (y <= cursor_y + 1))) {
-          locations.emplace_back(x, y);
-        }
-      } else {
-        locations.emplace_back(x, y);
-      }
+      if (!((x >= cursor_x - 1) && (x <= cursor_x + 1) && (y >= cursor_y - 1) &&
+            (y <= cursor_y + 1)))
+        p_locs.emplace_back(x, y);
+      if (!protect) p_locs.emplace_back(x, y);
     }
   }
-  shuffle(locations.begin(), locations.end(),
-          std::default_random_engine(time(0)));
+  shuffle(p_locs.begin(), p_locs.end(), std::default_random_engine(time(0)));
   for (int i = 0; i != num_mines; i++) {
-    const int &x = locations.back().first, &y = locations.back().second;
+    const int &x = p_locs.back().first, &y = p_locs.back().second;
     AddDigit(board[x][y], 1, 1);
     for (int x_off = -1; x_off != 2; x_off++) {
       for (int y_off = -1; y_off != 2; y_off++) {
@@ -118,11 +114,11 @@ void Grid::Mines(bool protect) {
         }
       }
     }
-    locations.pop_back();
+    p_locs.pop_back();
   }
 }
 
-void Grid::Reveal(int x, int y, bool flood) {
+void Grid::Reveal(int x, int y) {
   if (GetDigit(board[x][y], 2)) return;
   AddDigit(board[x][y], 2, 1);
   num_revealed++;
@@ -132,12 +128,12 @@ void Grid::Reveal(int x, int y, bool flood) {
       for (int &cell : col_vec) AddDigit(cell, 2, 1);
     }
   }
-  if (((GetDigit(board[x][y], 0)) == 0) && flood) {
+  if (((GetDigit(board[x][y], 0)) == 0)) {
     for (int x_off = -1; x_off != 2; x_off++) {
       for (int y_off = -1; y_off != 2; y_off++) {
         if ((x + x_off < board_size) && (x + x_off >= 0) &&
             (y + y_off < board_size) && (y + y_off >= 0)) {
-          Reveal(x + x_off, y + y_off, true);
+          Reveal(x + x_off, y + y_off);
         }
       }
     }
@@ -187,11 +183,10 @@ void Grid::DisplayBoard() {
       } else if (GetDigit(board[x][y], 1)) {
         cout << "*";
       } else {
-        !GetDigit(board[x][y], 0) ? (cout << " ")
-                                  : (cout << GetDigit(board[x][y], 0));
+        GetDigit(board[x][y], 0) ? (cout << GetDigit(board[x][y], 0))
+                                 : (cout << " ");
       }
-      if ((y == cursor_y) && (x == cursor_x)) cout << "\033[0m";  // clear
-      cout << " ";
+      ((y == cursor_y) && (x == cursor_x)) ? cout << "\033[0m " : cout << " ";
     }
     cout << "\n";
   }
