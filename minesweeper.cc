@@ -126,12 +126,10 @@ void Grid::Reveal(int x, int y, bool flood) {
   if (GetDigit(board[x][y], 2)) return;
   AddDigit(board[x][y], 2, 1);
   num_revealed++;
-  if ((GetDigit(board[x][y], 1)) && flood) {  // if pressed on mine
+  if ((GetDigit(board[x][y], 1))) {  // if pressed on mine
     game_over = true;
-    for (int i = 0; i != board_size; i++) {
-      for (int j = 0; j != board_size; j++) {
-        Reveal(i, j, false);
-      }
+    for (std::vector<int> &col_vec : board) {
+      for (int &cell : col_vec) AddDigit(cell, 2, 1);
     }
   }
   if (((GetDigit(board[x][y], 0)) == 0) && flood) {
