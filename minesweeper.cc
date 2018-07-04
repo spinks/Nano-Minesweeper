@@ -49,9 +49,7 @@ void Grid::GameSequence() {
              !(GetDigit(board[cursor_x][cursor_y], 2))) {
     over = Reveal(cursor_x, cursor_y);
   }
-  if (num_revealed == (board_size * board_size) - num_mines) {
-    over = won = true;
-  }
+  if (num_revealed == (board_size * board_size) - num_mines) over = won = true;
   if (over) DisplayBoard();
 }
 
@@ -61,7 +59,7 @@ int Grid::Prompt() {
     cout << (i ? "X" : "Y") << " -> ";
     int response = IntPrompt() - 1;
     if (response == -2) return 2;
-    (i ? cursor_x : cursor_y) = response;
+    if (response >= 0) (i ? cursor_x : cursor_y) = response;
     DisplayBoard();
   }
   cout << "Action (f = flag, !f = reveal)-> ";
@@ -76,7 +74,8 @@ int Grid::IntPrompt() {
   int value;
   do {
     std::getline(std::cin, line);
-    if (line == "c") return -1;  // cancelled int input
+    if (line == "c") return -1;   // cancelled int input
+    if (line.empty()) return -2;  // repeated number
     try {
       value = stoi(line);
     } catch (...) {
