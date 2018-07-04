@@ -13,8 +13,7 @@ class Grid {
   Grid();
 
  private:
-  bool game_over = false, game_won = false, mines_created = false,
-       first_display = true;
+  bool over = false, won = false, mines_created = false, first_display = true;
   int board_size = 16, num_flags = 0, num_revealed = 0, num_mines = 40,
       cursor_x = 0, cursor_y = 0;
   std::vector<std::vector<int>> board;
@@ -22,7 +21,7 @@ class Grid {
   int Prompt();
   int IntPrompt();
   void Mines(bool protect);
-  void Reveal(int x, int y);
+  bool Reveal(int x, int y);
   inline void AddDigit(int &value, int digit, int add_value);
   inline int GetDigit(const int &value, int digit);
   void DisplayBoard();
@@ -34,28 +33,26 @@ int main() {
 }
 
 Grid::Grid() : board(board_size, std::vector<int>(board_size, 0)) {
-  do {
-    GameSequence();
-  } while (!game_over);
+  while (!over) GameSequence();
 }
 
 void Grid::GameSequence() {
   DisplayBoard();
-  int reveal = Prompt();
-  if (reveal == 2) return;
-  if (!mines_created) (reveal ? Mines(true) : Mines(false));
-  if (!reveal) {  // if flag
+  int action_reveal = Prompt();
+  if (action_reveal == 2) return;
+  if (!mines_created) (action_reveal ? Mines(true) : Mines(false));
+  if (!action_reveal) {  // if flag
     int flag_change = (GetDigit(board[cursor_x][cursor_y], 3) ? -1 : 1);
     AddDigit(board[cursor_x][cursor_y], 3, flag_change);
     num_flags += flag_change;
   } else if (!(GetDigit(board[cursor_x][cursor_y], 3)) &&
              !(GetDigit(board[cursor_x][cursor_y], 2))) {
-    Reveal(cursor_x, cursor_y);
+    over = Reveal(cursor_x, cursor_y);
   }
   if (num_revealed == (board_size * board_size) - num_mines) {
-    game_over = game_won = true;
+    over = won = true;
   }
-  if (game_over) DisplayBoard();
+  if (over) DisplayBoard();
 }
 
 int Grid::Prompt() {
@@ -109,25 +106,19 @@ void Grid::Mines(bool protect) {
     for (int x_off = -1; x_off != 2; x_off++) {
       for (int y_off = -1; y_off != 2; y_off++) {
         if ((x + x_off < board_size) && (x + x_off >= 0) &&
-            (y + y_off < board_size) && (y + y_off >= 0)) {
+            (y + y_off < board_size) && (y + y_off >= 0))
           AddDigit(board[x + x_off][y + y_off], 0, 1);
-        }
       }
     }
-    p_locs.pop_back();
+    p_locs.pop_back();  // done after as &x &y are pointers
   }
 }
 
-void Grid::Reveal(int x, int y) {
-  if (GetDigit(board[x][y], 2)) return;
+bool Grid::Reveal(int x, int y) {  // returns game over status
+  if (GetDigit(board[x][y], 1)) return true;
+  if (GetDigit(board[x][y], 2)) return false;
   AddDigit(board[x][y], 2, 1);
   num_revealed++;
-  if ((GetDigit(board[x][y], 1))) {  // if pressed on mine
-    game_over = true;
-    for (std::vector<int> &col_vec : board) {
-      for (int &cell : col_vec) AddDigit(cell, 2, 1);
-    }
-  }
   if (((GetDigit(board[x][y], 0)) == 0)) {
     for (int x_off = -1; x_off != 2; x_off++) {
       for (int y_off = -1; y_off != 2; y_off++) {
@@ -138,6 +129,7 @@ void Grid::Reveal(int x, int y) {
       }
     }
   }
+  return false;
 }
 
 inline void Grid::AddDigit(int &value, int digit, int add_value) {
@@ -149,44 +141,33 @@ inline int Grid::GetDigit(const int &value, int digit) {
 }
 
 void Grid::DisplayBoard() {
-  int stack_height = std::to_string(board_size).length();
-  if (!first_display) {  // Redraw
-    int rows_up = board_size + stack_height + 2;
-    for (int i = 0; i != rows_up; i++) cout << "\033[F\33[2K";
-  }
+  int col_height = std::to_string(board_size).length();
+  if (!first_display)  // Redraw
+    cout << "\033[" + std::to_string(board_size + col_height + 2) + "F\033[J";
   if (first_display) first_display = false;
-
-  cout << "Mines: " << num_mines - num_flags;  // Header
-  game_won ? (cout << "\t :)\n")
-           : (game_over ? (cout << "\t :(\n") : (cout << "\t :|\n"));
-  for (int s = stack_height - 1; s != -1; s--) {  // Col Numbers
-    s == 0 ? (cout << "Ix.\t") : (cout << "\t");
+  cout << "\033[1mMines:\t" << num_mines - num_flags;  // Header
+  cout << (won ? "\t:)" : (over ? "\t :(" : "\t :|")) << "\n";
+  for (int s = col_height - 1; s != -1; s--) {  // Col Numbers
+    cout << "\t";
     for (int x = 1; x != board_size + 1; x++) {
       if (x == cursor_x + 1) cout << "\033[7m";
-      x >= pow(10, s)
-          ? cout << (GetDigit(x, s))
-          : (x == cursor_x + 1 ? (cout << "\033[0m ") : (cout << " "));
-      x == cursor_x + 1 ? (cout << "\033[0m ") : (cout << " ");
+      cout << (x >= pow(10, s) ? std::to_string(GetDigit(x, s))
+                               : (x == cursor_x + 1 ? ("\033[0m ") : (" ")));
+      cout << (x == cursor_x + 1 ? "\033[0m\033[1m " : " ");
     }
     cout << "\n";
   }
-
   for (int y = 0; y != board_size; y++) {  // Row Numbers + Board
-    y == cursor_y ? (cout << "\033[7m" << y + 1 << "\t\033[0m")
-                  : (cout << y + 1 << "\t");
+    if (y == cursor_y) cout << "\033[7m";
+    cout << "\033[1m" << y + 1 << "\033[0m\t";
     for (int x = 0; x != board_size; x++) {
       if ((y == cursor_y) && (x == cursor_x)) cout << "\033[7m";  // highlight
-      if (GetDigit(board[x][y], 3)) {
-        cout << "+";
-      } else if (!(GetDigit(board[x][y], 2))) {
-        cout << "-";
-      } else if (GetDigit(board[x][y], 1)) {
-        cout << "*";
-      } else {
-        GetDigit(board[x][y], 0) ? (cout << GetDigit(board[x][y], 0))
-                                 : (cout << " ");
-      }
-      ((y == cursor_y) && (x == cursor_x)) ? cout << "\033[0m " : cout << " ";
+      bool flag = GetDigit(board[x][y], 3), revealed = GetDigit(board[x][y], 2),
+           mine = GetDigit(board[x][y], 1), non_zero = GetDigit(board[x][y], 0);
+      char cell = (non_zero ? (GetDigit(board[x][y], 0) + '0') : ' ');
+      if (!revealed) cell = (over ? (mine ? (won ? '+' : '*') : '-') : '-');
+      if (flag) cell = (over ? (mine ? '+' : 'x') : '+');
+      cout << cell << (((y == cursor_y) && (x == cursor_x)) ? "\033[0m " : " ");
     }
     cout << "\n";
   }
