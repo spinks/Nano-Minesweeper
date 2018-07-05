@@ -20,7 +20,7 @@ class Grid {
   void GameSequence();
   int Prompt();
   int IntPrompt(int limit);
-  void Mines(bool protect);
+  void Mines();
   bool Reveal(int x, int y);
   inline void AddDigit(int &value, int digit, int add_value);
   inline int GetDigit(const int &value, int digit);
@@ -58,7 +58,7 @@ void Grid::GameSequence() {
   DisplayBoard();
   int action_reveal = Prompt();
   if (action_reveal == 2) return;
-  if (!mines_created) (action_reveal ? Mines(true) : Mines(false));
+  if (!mines_created && action_reveal) Mines();
   if (!action_reveal) {  // if flag
     int flag_change = (GetDigit(board[cursor_x][cursor_y], 3) ? -1 : 1);
     AddDigit(board[cursor_x][cursor_y], 3, flag_change);
@@ -103,7 +103,7 @@ int Grid::IntPrompt(int limit) {
   return value;
 }
 
-void Grid::Mines(bool protect) {
+void Grid::Mines() {
   if (mines_created) return;
   mines_created = true;
   std::vector<std::pair<int, int>> p_locs;
@@ -112,7 +112,6 @@ void Grid::Mines(bool protect) {
       if (!((x >= cursor_x - 1) && (x <= cursor_x + 1) && (y >= cursor_y - 1) &&
             (y <= cursor_y + 1)))
         p_locs.emplace_back(x, y);
-      if (!protect) p_locs.emplace_back(x, y);
     }
   }
   shuffle(p_locs.begin(), p_locs.end(), std::default_random_engine(time(0)));
