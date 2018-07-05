@@ -152,14 +152,15 @@ bool Grid::Reveal(int x, int y) {  // returns game over status
 }
 
 void Grid::DisplayBoard() {
-  int col_height = std::to_string(cols).length();
+  int col_height = std::to_string(cols).length(),
+      row_len = std::to_string(rows).length();
   if (!first_display)  // Redraw
     cout << "\033[" + std::to_string(rows + col_height + 2) + "F\033[J";
   if (first_display) first_display = false;
   cout << "\033[1m" << num_mines - num_flags << " / ";  // Header
   cout << (won ? ":)" : (over ? ":(" : ":|")) << "\n";
   for (int s = col_height - 1; s != -1; s--) {  // Col Numbers
-    cout << "\t";
+    for (int i = 0; i != row_len + 1; i++) cout << " ";
     for (int x = 1; x != cols + 1; x++) {
       if (x == cursor_x + 1) cout << "\033[7m";
       cout << (x >= pow(10, s) ? std::to_string(GetDigit(x, s))
@@ -169,8 +170,10 @@ void Grid::DisplayBoard() {
     cout << "\n";
   }
   for (int y = 0; y != rows; y++) {  // Row Numbers + Board
+    for (int i = 0; i != row_len - std::to_string(y + 1).length(); i++)
+      cout << " ";
     if (y == cursor_y) cout << "\033[7m";
-    cout << "\033[1m" << y + 1 << "\033[0m\t";
+    cout << "\033[1m" << y + 1 << "\033[0m ";
     for (int x = 0; x != cols; x++) {
       if ((y == cursor_y) && (x == cursor_x)) cout << "\033[7m";  // highlight
       bool flag = GetDigit(board[x][y], 3), revealed = GetDigit(board[x][y], 2),
