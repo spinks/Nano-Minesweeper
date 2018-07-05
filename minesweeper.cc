@@ -20,7 +20,7 @@ class Grid {
   void GameSequence();
   int Prompt();
   int IntPrompt(int limit);
-  void Mines();
+  void Mines(bool overflow);
   bool Reveal(int x, int y);
   inline void AddDigit(int &value, int digit, int add_value);
   inline int GetDigit(const int &value, int digit);
@@ -36,10 +36,8 @@ int main(int argc, char *argv[]) {
   if (argc == 4) {
     try {
       r = std::stoi(argv[1]), c = std::stoi(argv[2]), m = std::stoi(argv[3]);
-      if ((r <= 0) || (c <= 0))
-        throw std::domain_error(std::string("Rows + Cols must be > 0"));
-      if (m >= (r * c - 9))
-        throw std::domain_error(std::string("Mines must be <= board size -9"));
+      if (r <= 0 || c <= 0) throw std::domain_error("Rows + Cols must be > 0");
+      if (m >= (r * c)) throw std::domain_error("Mines must be < Rows * Cols");
     } catch (const std::exception &e) {
       std::cerr << e.what() << "\n";
       return 0;
@@ -58,7 +56,8 @@ void Grid::GameSequence() {
   DisplayBoard();
   int action_reveal = Prompt();
   if (action_reveal == 2) return;
-  if (!mines_created && action_reveal) Mines();
+  if (!mines_created && action_reveal)
+    (num_mines > (rows * cols - 9)) ? Mines(true) : Mines(false);
   if (!action_reveal) {  // if flag
     int flag_change = (GetDigit(board[cursor_x][cursor_y], 3) ? -1 : 1);
     AddDigit(board[cursor_x][cursor_y], 3, flag_change);
@@ -103,15 +102,18 @@ int Grid::IntPrompt(int limit) {
   return value;
 }
 
-void Grid::Mines() {
+void Grid::Mines(bool overflow) {
   if (mines_created) return;
   mines_created = true;
   std::vector<std::pair<int, int>> p_locs;
   for (int x = 0; x != cols; x++) {
     for (int y = 0; y != rows; y++) {
       if (!((x >= cursor_x - 1) && (x <= cursor_x + 1) && (y >= cursor_y - 1) &&
-            (y <= cursor_y + 1)))
+            (y <= cursor_y + 1))) {
         p_locs.emplace_back(x, y);
+      } else if (overflow && !((x == cursor_x) && (y == cursor_y))) {
+        p_locs.emplace_back(x, y);
+      }
     }
   }
   shuffle(p_locs.begin(), p_locs.end(), std::default_random_engine(time(0)));

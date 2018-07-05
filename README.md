@@ -12,10 +12,10 @@ The game now takes command line arguments allowing for custom games, or traditio
 	- `./game rows cols mines`
 	- Where rows, cols, mines are ints
 	- rows > 0 && cols > 0
-	- mines <= (rows*cols) - 9
+	- mines < (rows*cols)
 - Difficulty levels
 	- `./game difficulty`
-	- Where difficulty is a string 
+	- Where difficulty is a string
 	- **"easy"** or **"e"** for 9 by 9 grid with 10 mines
 	- **"hard"** or **"h"** for 30 by 16 grid with 99 mines
 	- **"int"** or **"i"** (or anything else as this is the fallback standard game) for 16 by 16 grid with 40 mines
@@ -34,6 +34,6 @@ Requires C++11.
 - Then you will be prompted for an action
 	- A **'f'** will flag or un-flag the current cursor location
 	- A **'c'** will cancel the current action (returning to cursor movement)
-	- Anything else (**empty input (enter)**, 'r', etc.) will reveal the current square 
+	- Anything else (**empty input (enter)**, 'r', etc.) will reveal the current square
 
 <img src="./Images/display.png" title="gameplay" width="328" height="344">
