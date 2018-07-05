@@ -20,7 +20,7 @@ class Grid {
   int rows = 16, cols = 16, num_flags = 0, num_revealed = 0, num_mines = 40,
       cursor_x = 0, cursor_y = 0;
   std::vector<std::vector<int>> board;
-  std::chrono::system_clock::time_point begin_time;
+  time_t begin_time;
   void GameSequence();
   int Prompt();
   int IntPrompt(int limit);
@@ -132,7 +132,7 @@ void Grid::Mines(bool overflow) {
     }
     p_locs.pop_back();  // done after as &x &y are pointers
   }
-  begin_time = std::chrono::system_clock::now();
+  begin_time = time(0);
 }
 
 bool Grid::Reveal(int x, int y) {  // returns game over status
@@ -160,10 +160,7 @@ void Grid::DisplayBoard() {
   if (first_display) first_display = false;
   cout << "\033[1m" << num_mines - num_flags << " / ";  // Header
   cout << (won ? ":)" : (over ? ":(" : ":|")) << " / ";
-  mines_created ? (cout << std::chrono::duration_cast<std::chrono::seconds>(
-                               std::chrono::system_clock::now() - begin_time)
-                               .count())
-                : (cout << "0");
+  mines_created ? (cout << std::difftime(time(0), begin_time)) : (cout << "0");
   cout << "s\n";
   for (int s = col_height - 1; s != -1; s--) {  // Col Numbers
     cout << "\t";
