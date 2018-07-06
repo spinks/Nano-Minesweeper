@@ -10,7 +10,10 @@ using std::cout;
 
 class Grid {
  public:
-  Grid(int r, int c, int m);
+  Grid(int r, int c, int m)
+      : rows(r), cols(c), num_mines(m), board(cols, std::vector<int>(rows, 0)) {
+    while (!over) GameSequence();
+  }
 
  private:
   bool over = false, won = false, mines_created = false, first_display = true;
@@ -22,9 +25,13 @@ class Grid {
   int IntPrompt(int limit);
   void Mines(bool overflow);
   bool Reveal(int x, int y);
-  inline void AddDigit(int &value, int digit, int add_value);
-  inline int GetDigit(const int &value, int digit);
   void DisplayBoard();
+  inline void AddDigit(int &value, int digit, int add_value) {
+    value += (pow(10, digit) * add_value);
+  };
+  inline int GetDigit(const int &value, int digit) {
+    return ((int)(value / pow(10, digit)) % (int)10);
+  };
 };
 
 int main(int argc, char *argv[]) {
@@ -45,11 +52,6 @@ int main(int argc, char *argv[]) {
   }
   Grid game(r, c, m);
   return 0;
-}
-
-Grid::Grid(int r, int c, int m)
-    : rows(r), cols(c), num_mines(m), board(cols, std::vector<int>(rows, 0)) {
-  while (!over) GameSequence();
 }
 
 void Grid::GameSequence() {
@@ -147,14 +149,6 @@ bool Grid::Reveal(int x, int y) {  // returns game over status
     }
   }
   return false;
-}
-
-inline void Grid::AddDigit(int &value, int digit, int add_value) {
-  value += (pow(10, digit) * add_value);
-}
-
-inline int Grid::GetDigit(const int &value, int digit) {
-  return ((int)(value / pow(10, digit)) % (int)10);  // 0 is ones, 1 is 10s ect
 }
 
 void Grid::DisplayBoard() {
