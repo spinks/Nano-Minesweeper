@@ -152,8 +152,7 @@ bool Grid::Reveal(int x, int y) {  // returns game over status
 }
 
 void Grid::DisplayBoard() {
-  int col_height = std::to_string(cols).length(),
-      row_len = std::to_string(rows).length();
+  int col_height = log10(cols) + 1, row_len = log10(rows) + 1;
   if (!first_display)  // Redraw
     cout << "\033[" + std::to_string(rows + col_height + 2) + "F\033[J";
   if (first_display) first_display = false;
@@ -170,11 +169,10 @@ void Grid::DisplayBoard() {
     cout << "\n";
   }
   for (int y = 0; y != rows; y++) {  // Row Numbers + Board
-    for (int i = 0; i != row_len - std::to_string(y + 1).length(); i++)
-      cout << " ";
+    for (int i = 0; i != row_len - ((int)log10(y + 1) + 1); i++) cout << " ";
     if (y == cursor_y) cout << "\033[7m";
     cout << "\033[1m" << y + 1 << "\033[0m ";
-    for (int x = 0; x != cols; x++) {
+    for (int x = 0; x != cols; x++) {                             // cells
       if ((y == cursor_y) && (x == cursor_x)) cout << "\033[7m";  // highlight
       bool flag = GetDigit(board[x][y], 3), revealed = GetDigit(board[x][y], 2),
            mine = GetDigit(board[x][y], 1), non_zero = GetDigit(board[x][y], 0);
