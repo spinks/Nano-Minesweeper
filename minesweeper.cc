@@ -39,15 +39,14 @@ int main(int argc, char *argv[]) {
   if (argc == 2) {
     if (!strcmp(argv[1], "easy") || !strcmp(argv[1], "e")) r = c = 9, m = 10;
     if (!strcmp(argv[1], "hard") || !strcmp(argv[1], "h")) c = 30, m = 99;
-  }
-  if (argc == 4) {
+  } else if (argc == 4) {
     try {
       r = std::stoi(argv[1]), c = std::stoi(argv[2]), m = std::stoi(argv[3]);
-      if (r <= 0 || c <= 0) throw std::domain_error("Rows + Cols must be > 0");
+      if (r <= 0 || c <= 0) throw std::domain_error("Rows & Cols must be > 0");
       if (m >= (r * c)) throw std::domain_error("Mines must be < Rows * Cols");
     } catch (const std::exception &e) {
       std::cerr << e.what() << "\n";
-      return 0;
+      return -1;
     }
   }
   Grid game(r, c, m);
@@ -105,7 +104,6 @@ int Grid::IntPrompt(int limit) {
 }
 
 void Grid::Mines(bool overflow) {
-  if (mines_created) return;
   mines_created = true;
   std::vector<std::pair<int, int>> p_locs;
   for (int x = 0; x != cols; x++) {
@@ -133,10 +131,10 @@ void Grid::Mines(bool overflow) {
   }
 }
 
-bool Grid::Reveal(int x, int y) {  // returns game over status
-  if (GetDigit(board[x][y], 1)) return true;
-  if (GetDigit(board[x][y], 2)) return false;
-  AddDigit(board[x][y], 2, 1);
+bool Grid::Reveal(int x, int y) {              // returns game over status
+  if (GetDigit(board[x][y], 2)) return false;  // if revealed dont (recursive)
+  if (GetDigit(board[x][y], 1)) return true;   // game over if mine
+  AddDigit(board[x][y], 2, 1);                 // increment revealed digit
   num_revealed++;
   if (((GetDigit(board[x][y], 0)) == 0)) {
     for (int x_off = -1; x_off != 2; x_off++) {
@@ -153,7 +151,7 @@ bool Grid::Reveal(int x, int y) {  // returns game over status
 
 void Grid::DisplayBoard() {
   int col_height = log10(cols) + 1, row_len = log10(rows) + 1;
-  if (!first_display)  // Redraw
+  if (!first_display)  // Redraw (2 is header + prompt line)
     cout << "\033[" + std::to_string(rows + col_height + 2) + "F\033[J";
   if (first_display) first_display = false;
   cout << "\033[1m" << num_mines - num_flags << " / ";  // Header
