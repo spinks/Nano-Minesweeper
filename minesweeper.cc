@@ -106,8 +106,8 @@ int Grid::IntPrompt(int limit) {
 void Grid::Mines(bool overflow) {
   mines_created = true;
   std::vector<std::pair<int, int>> p_locs;
-  for (int x = 0; x != cols; x++) {
-    for (int y = 0; y != rows; y++) {
+  for (int x = 0; x != cols; ++x) {
+    for (int y = 0; y != rows; ++y) {
       if (!((x >= cursor_x - 1) && (x <= cursor_x + 1) && (y >= cursor_y - 1) &&
             (y <= cursor_y + 1))) {
         p_locs.emplace_back(x, y);
@@ -117,11 +117,11 @@ void Grid::Mines(bool overflow) {
     }
   }
   shuffle(p_locs.begin(), p_locs.end(), std::default_random_engine(time(0)));
-  for (int i = 0; i != num_mines; i++) {
+  for (int i = 0; i != num_mines; ++i) {
     const int &x = p_locs.back().first, &y = p_locs.back().second;
     AddDigit(board[x][y], 1, 1);
-    for (int x_off = -1; x_off != 2; x_off++) {
-      for (int y_off = -1; y_off != 2; y_off++) {
+    for (int x_off = -1; x_off != 2; ++x_off) {
+      for (int y_off = -1; y_off != 2; ++y_off) {
         if ((x + x_off < cols) && (x + x_off >= 0) && (y + y_off < rows) &&
             (y + y_off >= 0))
           AddDigit(board[x + x_off][y + y_off], 0, 1);
@@ -135,10 +135,10 @@ bool Grid::Reveal(int x, int y) {              // returns game over status
   if (GetDigit(board[x][y], 2)) return false;  // if revealed dont (recursive)
   if (GetDigit(board[x][y], 1)) return true;   // game over if mine
   AddDigit(board[x][y], 2, 1);                 // increment revealed digit
-  num_revealed++;
+  ++num_revealed;
   if (((GetDigit(board[x][y], 0)) == 0)) {
-    for (int x_off = -1; x_off != 2; x_off++) {
-      for (int y_off = -1; y_off != 2; y_off++) {
+    for (int x_off = -1; x_off != 2; ++x_off) {
+      for (int y_off = -1; y_off != 2; ++y_off) {
         if ((x + x_off < cols) && (x + x_off >= 0) && (y + y_off < rows) &&
             (y + y_off >= 0)) {
           Reveal(x + x_off, y + y_off);
@@ -156,9 +156,9 @@ void Grid::DisplayBoard() {
   if (first_display) first_display = false;
   cout << "\033[1m" << num_mines - num_flags << " / ";  // Header
   cout << (won ? ":)" : (over ? ":(" : ":|")) << "\n";
-  for (int s = col_height - 1; s != -1; s--) {  // Col Numbers
-    for (int i = 0; i != row_len + 1; i++) cout << " ";
-    for (int x = 1; x != cols + 1; x++) {
+  for (int s = col_height - 1; s != -1; --s) {  // Col Numbers
+    for (int i = 0; i != row_len + 1; ++i) cout << " ";
+    for (int x = 1; x != cols + 1; ++x) {
       if (x == cursor_x + 1) cout << "\033[7m";
       cout << (x >= pow(10, s) ? std::to_string(GetDigit(x, s))
                                : (x == cursor_x + 1 ? ("\033[0m ") : (" ")));
@@ -166,11 +166,11 @@ void Grid::DisplayBoard() {
     }
     cout << "\n";
   }
-  for (int y = 0; y != rows; y++) {  // Row Numbers + Board
-    for (int i = 0; i != row_len - ((int)log10(y + 1) + 1); i++) cout << " ";
+  for (int y = 0; y != rows; ++y) {  // Row Numbers + Board
+    for (int i = 0; i != row_len - ((int)log10(y + 1) + 1); ++i) cout << " ";
     if (y == cursor_y) cout << "\033[7m";
     cout << "\033[1m" << y + 1 << "\033[0m ";
-    for (int x = 0; x != cols; x++) {                             // cells
+    for (int x = 0; x != cols; ++x) {                             // cells
       if ((y == cursor_y) && (x == cursor_x)) cout << "\033[7m";  // highlight
       bool flag = GetDigit(board[x][y], 3), revealed = GetDigit(board[x][y], 2),
            mine = GetDigit(board[x][y], 1), non_zero = GetDigit(board[x][y], 0);
