@@ -1,3 +1,5 @@
+#include <sys/ioctl.h>
+#include <unistd.h>
 #include <cmath>
 #include <ctime>
 #include <iostream>
@@ -35,7 +37,9 @@ class Grid {
 };
 
 int main(int argc, char *argv[]) {
-  int r = 16, c = 16, m = 40;
+  struct winsize ts;
+  ioctl(STDIN_FILENO, TIOCGWINSZ, &ts);
+  int r = 16, temp_r = 0, c = 16, temp_c = 0, m = 40;
   if (argc == 2) {
     if (!strcmp(argv[1], "easy") || !strcmp(argv[1], "e")) r = c = 9, m = 10;
     if (!strcmp(argv[1], "hard") || !strcmp(argv[1], "h")) c = 30, m = 99;
@@ -43,11 +47,22 @@ int main(int argc, char *argv[]) {
     try {
       r = std::stoi(argv[1]), c = std::stoi(argv[2]), m = std::stoi(argv[3]);
       if (r <= 0 || c <= 0) throw std::domain_error("Rows & Cols must be > 0");
-      if (m >= (r * c)) throw std::domain_error("Mines must be < Rows * Cols");
+      if (m >= (r * c)) m = (r * c) - 1;
     } catch (const std::exception &e) {
       std::cerr << e.what() << "\n";
       return -1;
     }
+  }
+  if ((c * 2) + (log10(r) + 1) > ts.ws_col) {
+    temp_c = c, temp_r = r;
+    c = (int)(ts.ws_col / 2) - (log10(r) - 1) - 1;
+  }
+  if (r + 2 + (log10(c) + 1) > ts.ws_row) {
+    if (!(temp_c || temp_r)) temp_c = c, temp_r = r;
+    r = ts.ws_row - 2 - (log10(c) + 1);
+  }
+  if (temp_c || temp_r) {
+    m = (m * r * c) / (temp_r * temp_c);
   }
   Grid game(r, c, m);
   return 0;
