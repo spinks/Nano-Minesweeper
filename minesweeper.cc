@@ -52,15 +52,15 @@ int main(int argc, char *argv[]) {
       std::cerr << e.what() << "\n";
       return -1;
     }
-  }
+  }  // check cols fit
   if ((c * 2) + (log10(r) + 1) > ts.ws_col) {
     temp_c = c, temp_r = r;
-    c = (int)(ts.ws_col / 2) - (log10(r) - 1) - 1;
-  }
+    c = (ts.ws_col / 2) - (log10(r) - 1) - 1;
+  }  // check rows fit
   if (r + 2 + (log10(c) + 1) > ts.ws_row) {
     if (!(temp_c || temp_r)) temp_c = c, temp_r = r;
     r = ts.ws_row - 2 - (log10(c) + 1);
-  }
+  }  // if either was changed proportionally change mines
   if (temp_c || temp_r) {
     m = (m * r * c) / (temp_r * temp_c);
   }
@@ -168,7 +168,6 @@ void Grid::DisplayBoard() {
   int col_height = log10(cols) + 1, row_len = log10(rows) + 1;
   if (!first_display)  // Redraw (2 is header + prompt line)
     cout << "\033[" + std::to_string(rows + col_height + 2) + "F\033[J";
-  if (first_display) first_display = false;
   cout << "\033[1m" << num_mines - num_flags << " / ";  // Header
   cout << (won ? ":)" : (over ? ":(" : ":|")) << "\n";
   for (int s = col_height - 1; s != -1; --s) {  // Col Numbers
@@ -196,4 +195,6 @@ void Grid::DisplayBoard() {
     }
     cout << "\n";
   }
+  if (first_display) cout << "\n\033[1F";
+  if (first_display) first_display = false;
 }
