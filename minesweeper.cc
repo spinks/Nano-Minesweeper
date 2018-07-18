@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
       r = std::stoi(argv[1]), c = std::stoi(argv[2]), m = std::stoi(argv[3]);
       if (r <= 0 || c <= 0) throw std::domain_error("Rows & Cols must be > 0");
       if (m >= (r * c)) throw std::domain_error("Mines must be < Rows * Cols");
+      if (m < 0) throw std::domain_error("Mines must be > 0");
     } catch (const std::exception &e) {
       std::cerr << e.what() << "\n";
       return -1;
