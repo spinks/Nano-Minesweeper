@@ -35,19 +35,19 @@ class Grid {
 };
 
 int main(int argc, char *argv[]) {
-  int r = 16, c = 16, m = 40;
-  if (argc == 2) {
+  int r = 16, c = 16, m = 40;  // default values (medium difficulty)
+  if (argc == 2) {             // handle preset difficulty values
     if (!strcmp(argv[1], "easy") || !strcmp(argv[1], "e")) r = c = 9, m = 10;
     if (!strcmp(argv[1], "hard") || !strcmp(argv[1], "h")) c = 30, m = 99;
-  } else if (argc == 4) {
+  } else if (argc == 4) {  // handle custom dimensions
     try {
       r = std::stoi(argv[1]), c = std::stoi(argv[2]), m = std::stoi(argv[3]);
       if (r <= 0 || c <= 0) throw std::domain_error("Rows & Cols must be > 0");
       if (m >= (r * c)) throw std::domain_error("Mines must be < Rows * Cols");
-      if (m < 0) throw std::domain_error("Mines must be > 0");
-    } catch (const std::exception &e) {
+      if (m < 0) throw std::domain_error("Mines must be >= 0");
+    } catch (const std::exception &e) {  // will also catch stoi errors
       std::cerr << e.what() << "\n";
-      return -1;
+      return -1;  // exit program due to malformed input
     }
   }
   Grid game(r, c, m);
@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
 void Grid::GameSequence() {
   DisplayBoard();
   int action_reveal = Prompt();
-  if (action_reveal == 2) return;
-  if (!mines_created && action_reveal)
+  if (action_reveal == 2) return;       // canceled action
+  if (!mines_created && action_reveal)  // Mines(true) if requires overflow locs
     (num_mines > (rows * cols - 9)) ? Mines(true) : Mines(false);
   if (!action_reveal) {  // if flag
     int flag_change = (GetDigit(board[cursor_x][cursor_y], 3) ? -1 : 1);
@@ -73,7 +73,7 @@ void Grid::GameSequence() {
 }
 
 int Grid::Prompt() {
-  for (int i = 1; i != -1; i--) {  // process cursor mode
+  for (int i = 1; i != -1; i--) {  // process cursor move
     cout << (i ? "X" : "Y") << " -> ";
     int response = (i ? IntPrompt(cols) : IntPrompt(rows)) - 1;
     if (response == -2) return 2;  // cancel return
@@ -83,8 +83,7 @@ int Grid::Prompt() {
   cout << "Action (f = flag, !f = reveal)-> ";
   std::string action;
   std::getline(std::cin, action);
-  if (action == "c") return 2;
-  return (action == "f" ? 0 : 1);  // 0 - flag 1 - reveal
+  return (action == "c" ? 2 : (action == "f" ? 0 : 1));  // 0 - flag 1 - reveal
 }
 
 int Grid::IntPrompt(int limit) {
@@ -133,11 +132,11 @@ void Grid::Mines(bool overflow) {
 }
 
 bool Grid::Reveal(int x, int y) {              // returns game over status
-  if (GetDigit(board[x][y], 2)) return false;  // if revealed dont (recursive)
+  if (GetDigit(board[x][y], 2)) return false;  // if revealed don't (recursive)
   if (GetDigit(board[x][y], 1)) return true;   // game over if mine
   AddDigit(board[x][y], 2, 1);                 // increment revealed digit
   ++num_revealed;
-  if (((GetDigit(board[x][y], 0)) == 0)) {
+  if (GetDigit(board[x][y], 0) == 0) {
     for (int x_off = -1; x_off != 2; ++x_off) {
       for (int y_off = -1; y_off != 2; ++y_off) {
         if ((x + x_off < cols) && (x + x_off >= 0) && (y + y_off < rows) &&
