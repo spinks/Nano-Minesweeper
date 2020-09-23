@@ -39,3 +39,7 @@ Requires C++11.
 	- A **'f'** will flag or un-flag the current cursor location
 	- A **'c'** will cancel the current action (returning to cursor movement)
 	- Anything else (**empty input (enter)**, 'r', etc.) will reveal the current square
+
+#### Notes
+
+There are many things done here simply to make the code very compact. It is not written for legibility.
