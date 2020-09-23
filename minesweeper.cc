@@ -80,7 +80,7 @@ int Grid::Prompt() {
     if (response >= 0) (i ? cursor_x : cursor_y) = response;
     DisplayBoard();
   }
-  cout << "Action (f = flag, !f = reveal)-> ";
+  cout << "Action (f = flag, !f = reveal, c = cancel)-> ";
   std::string action;
   std::getline(std::cin, action);
   return (action == "c" ? 2 : (action == "f" ? 0 : 1));  // 0 - flag 1 - reveal
@@ -181,4 +181,5 @@ void Grid::DisplayBoard() {
     }
     cout << "\n";
   }
+  cout << "\n\033[F";
 }

@@ -4,6 +4,10 @@ A lighter version of a command line minesweeper [game](https://github.com/spinks
 
 Build with `make` run with `./game`.
 
+<p align="center">
+<img src="./Images/display.png" title="gameplay" height="400">
+</p>
+
 ### Arguments
 
 The game now takes command line arguments allowing for custom games, or traditional difficulty levels:
@@ -35,5 +39,3 @@ Requires C++11.
 	- A **'f'** will flag or un-flag the current cursor location
 	- A **'c'** will cancel the current action (returning to cursor movement)
 	- Anything else (**empty input (enter)**, 'r', etc.) will reveal the current square
-
-<img src="./Images/display.png" title="gameplay" width="328" height="344">
