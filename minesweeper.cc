@@ -108,12 +108,10 @@ void Grid::Mines(bool overflow) {
   std::vector<std::pair<int, int>> p_locs;
   for (int x = 0; x != cols; ++x) {
     for (int y = 0; y != rows; ++y) {
-      if (!((x >= cursor_x - 1) && (x <= cursor_x + 1) && (y >= cursor_y - 1) &&
-            (y <= cursor_y + 1))) {
+      if ((overflow && x != cursor_x && y != cursor_y) ||
+          (x < cursor_x - 1 || x > cursor_x + 1 || y < cursor_y - 1 ||
+           y > cursor_y + 1))
         p_locs.emplace_back(x, y);
-      } else if (overflow && !((x == cursor_x) && (y == cursor_y))) {
-        p_locs.emplace_back(x, y);
-      }
     }
   }
   shuffle(p_locs.begin(), p_locs.end(), std::default_random_engine(time(0)));
