@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-using std::cout;
-
 class Grid {
  public:
   Grid(int r, int c, int m)
@@ -66,13 +64,13 @@ void Grid::GameSequence() {
 
 int Grid::Prompt() {
   for (int i = 1; i != -1; i--) {  // process cursor move
-    cout << (i ? "X" : "Y") << " -> ";
+    std::cout << (i ? "X" : "Y") << " -> ";
     int response = (i ? IntPrompt(cols) : IntPrompt(rows)) - 1;
     if (response == -2) return 2;  // cancel return
     if (response >= 0) (i ? c_x : c_y) = response;
     DisplayBoard();
   }
-  cout << "Action (f = flag, !f = reveal, c = cancel) -> ";
+  std::cout << "Action (f = flag, !f = reveal, c = cancel) -> ";
   std::string action;
   std::getline(std::cin, action);
   return (action == "c" ? 2 : (action == "f" ? 0 : 1));  // 0 - flag 1 - reveal
@@ -90,7 +88,7 @@ int Grid::IntPrompt(int limit) {
     } catch (...) {
       value = -1;
     }
-    if ((value < 1) || (value > limit)) cout << "\033[F\033[5C\033[K";
+    if ((value < 1) || (value > limit)) std::cout << "\033[F\033[5C\033[K";
   } while ((value < 1) || (value > limit));
   return value;
 }
@@ -138,33 +136,34 @@ bool Grid::Reveal(int x, int y) {              // returns game over status
 void Grid::DisplayBoard() {
   int col_height = log10(cols) + 1, row_len = log10(rows) + 1;
   if (!first_display)  // Redraw (2 is header + prompt line)
-    cout << "\033[" + std::to_string(rows + col_height + 2) + "F\033[J";
+    std::cout << "\033[" + std::to_string(rows + col_height + 2) + "F\033[J";
   if (first_display) first_display = false;
-  cout << "\033[1m" << num_mines - num_flags << " / "
-       << (won ? ":)" : (over ? ":(" : ":|")) << "\n";
+  std::cout << "\033[1m" << num_mines - num_flags << " / "
+            << (won ? ":)" : (over ? ":(" : ":|")) << "\n";
   for (int s = col_height - 1; s != -1; --s) {  // Col Numbers
-    for (int i = 0; i != row_len + 1; ++i) cout << " ";
+    for (int i = 0; i != row_len + 1; ++i) std::cout << " ";
     for (int x = 1; x != cols + 1; ++x) {
-      cout << (x == c_x + 1 ? "\033[7m" : "")
-           << (x >= pow(10, s) ? std::to_string(GetDigit(x, s))
-                               : (x == c_x + 1 ? ("\033[0m ") : (" ")))
-           << (x == c_x + 1 ? "\033[0m\033[1m " : " ");
+      std::cout << (x == c_x + 1 ? "\033[7m" : "")
+                << (x >= pow(10, s) ? std::to_string(GetDigit(x, s))
+                                    : (x == c_x + 1 ? ("\033[0m ") : (" ")))
+                << (x == c_x + 1 ? "\033[0m\033[1m " : " ");
     }
-    cout << "\n";
+    std::cout << "\n";
   }
   for (int y = 0; y != rows; ++y) {  // Row Numbers + Board
-    for (int i = 0; i != row_len - ((int)log10(y + 1) + 1); ++i) cout << " ";
-    cout << (y == c_y ? "\033[7m" : "") << "\033[1m" << y + 1 << "\033[0m ";
-    for (int x = 0; x != cols; ++x) {                   // cells
-      if ((y == c_y) && (x == c_x)) cout << "\033[7m";  // highlight
+    std::string s(row_len - (int)log10(y + 1) - 1, ' ');
+    std::cout << s << (y == c_y ? "\033[7m" : "") << "\033[1m" << y + 1
+              << "\033[0m ";
+    for (int x = 0; x != cols; ++x) {  // cells
       bool flag = GetDigit(board[x][y], 3), revealed = GetDigit(board[x][y], 2),
            mine = GetDigit(board[x][y], 1), non_zero = GetDigit(board[x][y], 0);
       char cell = (non_zero ? (GetDigit(board[x][y], 0) + '0') : ' ');
       if (!revealed) cell = (over ? (mine ? (won ? '+' : '*') : '-') : '-');
       if (flag) cell = (over ? (mine ? '+' : 'x') : '+');
-      cout << cell << (((y == c_y) && (x == c_x)) ? "\033[0m " : " ");
+      std::cout << ((y == c_y && x == c_x) ? "\033[7m" : "") << cell
+                << ((y == c_y && x == c_x) ? "\033[0m " : " ");
     }
-    cout << "\n";
+    std::cout << "\n";
   }
-  cout << "\n\033[F";
+  std::cout << "\n\033[F";
 }
