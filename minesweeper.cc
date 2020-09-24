@@ -65,9 +65,9 @@ void Grid::GameSequence() {
 int Grid::Prompt() {
   for (int i = 1; i != -1; i--) {  // process cursor move
     std::cout << (i ? "X" : "Y") << " -> ";
-    int response = (i ? IntPrompt(cols) : IntPrompt(rows)) - 1;
-    if (response == -2) return 2;  // cancel return
-    if (response >= 0) (i ? c_x : c_y) = response;
+    int response = (i ? IntPrompt(cols) : IntPrompt(rows));
+    if (response == -1) return 2;  // cancel return
+    if (response >= 1) (i ? c_x : c_y) = response - 1;
     DisplayBoard();
   }
   std::cout << "Action (f = flag, !f = reveal, c = cancel) -> ";
