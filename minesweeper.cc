@@ -120,14 +120,12 @@ bool Grid::Reveal(int x, int y) {              // returns game over status
   if (GetDigit(board[x][y], 2)) return false;  // if revealed don't (recursive)
   if (GetDigit(board[x][y], 1)) return true;   // game over if mine
   AddDigit(board[x][y], 2, 1);                 // increment revealed digit
-  ++num_revealed;
-  if (GetDigit(board[x][y], 0) == 0) {
-    for (int o_x = -1; o_x != 2; ++o_x) {
-      for (int o_y = -1; o_y != 2; ++o_y) {
-        if (x + o_x < cols && x + o_x >= 0 && y + o_y < rows && y + o_y >= 0) {
-          Reveal(x + o_x, y + o_y);
-        }
-      }
+  ++num_revealed;                              // increment revealed count
+  if (GetDigit(board[x][y], 0)) return false;  // if adjacent mines dont recurse
+  for (int o_x = -1; o_x != 2; ++o_x) {
+    for (int o_y = -1; o_y != 2; ++o_y) {
+      if (x + o_x < cols && x + o_x >= 0 && y + o_y < rows && y + o_y >= 0)
+        Reveal(x + o_x, y + o_y);
     }
   }
   return false;
