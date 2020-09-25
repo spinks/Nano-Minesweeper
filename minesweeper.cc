@@ -18,6 +18,7 @@ class Grid {
   int rows = 16, cols = 16, num_flags = 0, num_revealed = 0, num_mines = 40,
       c_x = 0, c_y = 0, Prompt(), IntPrompt(int limit);
   std::vector<std::vector<int>> board;
+  std::string rst = "\033[0m", bld = "\033[1m", inv = "\033[7m";
   void GameSequence(), DisplayBoard(), Mines(bool overflow);
   inline void AddDigit(int &value, int digit, int add_value) {
     value += (pow(10, digit) * add_value);
@@ -130,30 +131,27 @@ void Grid::DisplayBoard() {
   if (!first_display)  // Redraw (2 is header + prompt line)
     std::cout << "\033[" + std::to_string(rows + col_height + 2) + "F\033[J";
   if (first_display) first_display = false;
-  std::cout << "\033[1m" << num_mines - num_flags << " / "
+  std::cout << bld << num_mines - num_flags << " / "
             << (won ? ":)" : (over ? ":(" : ":|")) << "\n";
   for (int s = col_height - 1; s != -1; --s) {  // Col Numbers
     for (int i = 0; i != row_len + 1; ++i) std::cout << " ";
-    for (int x = 1; x != cols + 1; ++x) {
-      std::cout << (x == c_x + 1 ? "\033[7m" : "")
+    for (int x = 1; x != cols + 1; ++x)
+      std::cout << (x == c_x + 1 ? inv : "")
                 << (x >= pow(10, s) ? std::to_string(GetDigit(x, s))
-                                    : (x == c_x + 1 ? ("\033[0m ") : (" ")))
-                << (x == c_x + 1 ? "\033[0m\033[1m " : " ");
-    }
+                                    : (x == c_x + 1 ? rst + " " : " "))
+                << (x == c_x + 1 ? rst + bld : "") << " ";
     std::cout << "\n";
   }
   for (int y = 0; y != rows; ++y) {  // Row Numbers + Board
-    std::string s(row_len - (int)log10(y + 1) - 1, ' ');
-    std::cout << s << (y == c_y ? "\033[7m" : "") << "\033[1m" << y + 1
-              << "\033[0m ";
+    std::string ws(row_len - (int)log10(y + 1) - 1, ' ');
+    std::cout << ws << (y == c_y ? inv : "") << bld << y + 1 << rst << " ";
     for (int x = 0; x != cols; ++x) {  // cells
-      bool flag = GetDigit(board[x][y], 3), revealed = GetDigit(board[x][y], 2),
-           mine = GetDigit(board[x][y], 1), non_zero = GetDigit(board[x][y], 0);
-      char cell = (non_zero ? (GetDigit(board[x][y], 0) + '0') : ' ');
-      if (!revealed) cell = (over ? (mine ? (won ? '+' : '*') : '-') : '-');
-      if (flag) cell = (over ? (mine ? '+' : 'x') : '+');
-      std::cout << ((y == c_y && x == c_x) ? "\033[7m" : "") << cell
-                << ((y == c_y && x == c_x) ? "\033[0m " : " ");
+      int flag = GetDigit(board[x][y], 3), revealed = GetDigit(board[x][y], 2),
+          mine = GetDigit(board[x][y], 1), nzero = GetDigit(board[x][y], 0);
+      std::string cell = nzero ? std::to_string(nzero) : " ";
+      if (!revealed) cell = (over ? (mine ? (won ? "+" : "*") : "-") : "-");
+      if (flag) cell = (over ? (mine ? "+" : "x") : "+");
+      std::cout << ((y == c_y && x == c_x) ? inv + cell + rst : cell) << " ";
     }
     std::cout << "\n";
   }
