@@ -96,23 +96,19 @@ int Grid::IntPrompt(int limit) {
 void Grid::Mines(bool overflow) {
   mines_created = true;
   std::vector<std::pair<int, int>> p_locs;
-  for (int x = 0; x != cols; ++x) {
-    for (int y = 0; y != rows; ++y) {
+  for (int x = 0; x != cols; ++x)
+    for (int y = 0; y != rows; ++y)
       if ((overflow && x != c_x && y != c_y) ||
           (x < c_x - 1 || x > c_x + 1 || y < c_y - 1 || y > c_y + 1))
         p_locs.emplace_back(x, y);
-    }
-  }
   shuffle(p_locs.begin(), p_locs.end(), std::default_random_engine(time(0)));
   for (int i = 0; i != num_mines; ++i) {
     const int &x = p_locs[i].first, &y = p_locs[i].second;
     AddDigit(board[x][y], 1, 1);
-    for (int o_x = -1; o_x != 2; ++o_x) {
-      for (int o_y = -1; o_y != 2; ++o_y) {
+    for (int o_x = -1; o_x != 2; ++o_x)
+      for (int o_y = -1; o_y != 2; ++o_y)
         if (x + o_x < cols && x + o_x >= 0 && y + o_y < rows && y + o_y >= 0)
           AddDigit(board[x + o_x][y + o_y], 0, 1);
-      }
-    }
   }
 }
 
@@ -122,12 +118,10 @@ bool Grid::Reveal(int x, int y) {              // returns game over status
   AddDigit(board[x][y], 2, 1);                 // increment revealed digit
   ++num_revealed;                              // increment revealed count
   if (GetDigit(board[x][y], 0)) return false;  // if adjacent mines dont recurse
-  for (int o_x = -1; o_x != 2; ++o_x) {
-    for (int o_y = -1; o_y != 2; ++o_y) {
+  for (int o_x = -1; o_x != 2; ++o_x)
+    for (int o_y = -1; o_y != 2; ++o_y)
       if (x + o_x < cols && x + o_x >= 0 && y + o_y < rows && y + o_y >= 0)
         Reveal(x + o_x, y + o_y);
-    }
-  }
   return false;
 }
 
