@@ -49,16 +49,14 @@ int main(int argc, char *argv[]) {
 
 void Grid::GameSequence() {
   DisplayBoard();
-  int action_reveal = Prompt();
-  if (action_reveal == 2) return;       // canceled action
-  if (!mines_created && action_reveal)  // Mines(true) if requires overflow locs
+  int act = Prompt();
+  if (act == 2) return;       // canceled action
+  if (!mines_created && act)  // on reveal Mines(true) if requires overflow locs
     (num_mines > (rows * cols - 9)) ? Mines(true) : Mines(false);
-  if (!action_reveal) {  // if flag
-    num_flags += (GetDigit(board[c_x][c_y], 3) ? -1 : 1);
-    AddDigit(board[c_x][c_y], 3, (GetDigit(board[c_x][c_y], 3) ? -1 : 1));
-  } else if (!GetDigit(board[c_x][c_y], 3) && !GetDigit(board[c_x][c_y], 2)) {
+  if (!act) num_flags += (GetDigit(board[c_x][c_y], 3) ? -1 : 1);
+  if (!act) AddDigit(board[c_x][c_y], 3, GetDigit(board[c_x][c_y], 3) ? -1 : 1);
+  if (act && !GetDigit(board[c_x][c_y], 3) && !GetDigit(board[c_x][c_y], 2))
     over = Reveal(c_x, c_y);
-  }
   if (num_revealed == (cols * rows) - num_mines) over = won = true;
   if (over) DisplayBoard();
 }
