@@ -1,5 +1,5 @@
+#include <algorithm>
 #include <cmath>
-#include <ctime>
 #include <iostream>
 #include <random>
 #include <string>
@@ -18,7 +18,7 @@ class Grid {
   int rows = 16, cols = 16, num_flags = 0, num_revealed = 0, num_mines = 40,
       c_x = 0, c_y = 0, Prompt(), IntPrompt(int limit);
   std::vector<std::vector<int>> board;
-  std::string rst = "\033[0m", bld = "\033[1m", inv = "\033[7m";
+  std::string rst = "\033[0m", bld = "\033[1m", inv = "\033[7m", prompt_line;
   void GameSequence(), DisplayBoard(), Mines(bool overflow);
   inline void AddDigit(int &value, int digit, int add_value) {
     value += (pow(10, digit) * add_value);
@@ -72,20 +72,18 @@ int Grid::Prompt() {
     DisplayBoard();
   }
   std::cout << "Action (f = flag, !f = reveal, c = cancel) -> ";
-  std::string action;
-  std::getline(std::cin, action);
-  return (action == "c" ? 2 : (action == "f" ? 0 : 1));  // 0 - flag 1 - reveal
+  std::getline(std::cin, prompt_line);  // 2 cancel / 1 reveal / 0 flag
+  return (prompt_line == "c" ? 2 : (prompt_line == "f" ? 0 : 1));
 }
 
 int Grid::IntPrompt(int limit) {
-  std::string line;
   int value;
   do {
-    std::getline(std::cin, line);
-    if (line == "c") return -1;   // cancelled int input
-    if (line.empty()) return -2;  // repeated number
+    std::getline(std::cin, prompt_line);
+    if (prompt_line == "c") return -1;   // cancelled int input
+    if (prompt_line.empty()) return -2;  // repeated number
     try {
-      value = std::stoi(line);
+      value = std::stoi(prompt_line);
     } catch (...) {
       value = -1;
     }
@@ -96,15 +94,15 @@ int Grid::IntPrompt(int limit) {
 
 void Grid::Mines(bool overflow) {
   mines_created = true;
-  std::vector<std::pair<int, int>> p_locs;
+  std::vector<std::pair<int, int>> locs;
   for (int x = 0; x != cols; ++x)
     for (int y = 0; y != rows; ++y)
       if ((overflow && x != c_x && y != c_y) ||
           (x < c_x - 1 || x > c_x + 1 || y < c_y - 1 || y > c_y + 1))
-        p_locs.emplace_back(x, y);
-  shuffle(p_locs.begin(), p_locs.end(), std::default_random_engine(time(0)));
+        locs.emplace_back(x, y);
+  std::shuffle(locs.begin(), locs.end(), std::random_device());
   for (int i = 0; i != num_mines; ++i) {
-    const int &x = p_locs[i].first, &y = p_locs[i].second;
+    const int &x = locs[i].first, &y = locs[i].second;
     AddDigit(board[x][y], 1, 1);
     for (int o_x = -1; o_x != 2; ++o_x)
       for (int o_y = -1; o_y != 2; ++o_y)
