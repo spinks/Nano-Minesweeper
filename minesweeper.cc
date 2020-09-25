@@ -6,19 +6,12 @@
 #include <vector>
 
 class Grid {
- public:
-  Grid(int r, int c, int m)
-      : rows(r), cols(c), num_mines(m), board(cols, std::vector<int>(rows, 0)) {
-    while (!over) GameSequence();
-  }
-
- private:
   bool over = false, won = false, mines_created = false, first_display = true,
        Reveal(int x, int y);
   int rows = 16, cols = 16, num_flags = 0, num_revealed = 0, num_mines = 40,
-      c_x = 0, c_y = 0, Prompt(), IntPrompt(int limit);
+      c_x = 0, c_y = 0, Prompt(), IntPrompt(int limit), p_int;
   std::vector<std::vector<int>> board;
-  std::string rst = "\033[0m", bld = "\033[1m", inv = "\033[7m", prompt_line;
+  std::string rst = "\033[0m", bld = "\033[1m", inv = "\033[7m", p_line;
   void GameSequence(), DisplayBoard(), Mines(bool overflow);
   inline void AddDigit(int &value, int digit, int add_value) {
     value += (pow(10, digit) * add_value);
@@ -26,6 +19,13 @@ class Grid {
   inline int GetDigit(const int &value, int digit) {
     return ((int)(value / pow(10, digit)) % (int)10);
   };
+
+ public:
+  Grid(int r, int c, int m)
+      : rows(r), cols(c), num_mines(m), board(cols, std::vector<int>(rows, 0)) {
+    while (!over) DisplayBoard(), GameSequence();
+    DisplayBoard();  // display once more at end
+  }
 };
 
 int main(int argc, char *argv[]) {
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
   if (argc == 2) {             // handle preset difficulty values
     if (!strcmp(argv[1], "easy") || !strcmp(argv[1], "e")) r = c = 9, m = 10;
     if (!strcmp(argv[1], "hard") || !strcmp(argv[1], "h")) c = 30, m = 99;
-  } else if (argc == 4) {  // handle custom dimensions
+  } else if (argc == 4)  // handle custom dimensions
     try {
       r = std::stoi(argv[1]), c = std::stoi(argv[2]), m = std::stoi(argv[3]);
       if (r <= 0 || c <= 0) throw std::domain_error("Rows & Cols must be > 0");
@@ -43,12 +43,10 @@ int main(int argc, char *argv[]) {
       std::cerr << e.what() << "\n";
       return -1;  // exit program due to malformed input
     }
-  }
   Grid game(r, c, m);
 }
 
 void Grid::GameSequence() {
-  DisplayBoard();
   int act = Prompt();
   if (act == 2) return;       // canceled action
   if (!mines_created && act)  // on reveal Mines(true) if requires overflow locs
@@ -58,36 +56,33 @@ void Grid::GameSequence() {
   if (act && !GetDigit(board[c_x][c_y], 3) && !GetDigit(board[c_x][c_y], 2))
     over = Reveal(c_x, c_y);
   if (num_revealed == (cols * rows) - num_mines) over = won = true;
-  if (over) DisplayBoard();
 }
 
 int Grid::Prompt() {
   for (int i = 1; i != -1; i--) {  // process cursor move
-    std::cout << (i ? "X" : "Y") << " -> ";
+    std::cout << bld << (i ? "X" : "Y") << " -> ";
     int response = (i ? IntPrompt(cols) : IntPrompt(rows));
     if (response == -1) return 2;  // cancel return
     if (response >= 1) (i ? c_x : c_y) = response - 1;
     DisplayBoard();
   }
-  std::cout << "Action (f = flag, !f = reveal, c = cancel) -> ";
-  std::getline(std::cin, prompt_line);  // 2 cancel / 1 reveal / 0 flag
-  return (prompt_line == "c" ? 2 : (prompt_line == "f" ? 0 : 1));
+  std::cout << bld << "(f)lag / (c)ancel / (*)reveal -> ";
+  std::getline(std::cin, p_line);  // 2 cancel / 1 reveal / 0 flag
+  return (p_line == "c" ? 2 : (p_line == "f" ? 0 : 1));
 }
 
 int Grid::IntPrompt(int limit) {
-  int value;
   do {
-    std::getline(std::cin, prompt_line);
-    if (prompt_line == "c") return -1;   // cancelled int input
-    if (prompt_line.empty()) return -2;  // repeated number
+    std::getline(std::cin, p_line);
+    if (p_line == "c" || p_line.empty()) return (p_line == "c" ? -1 : -2);
     try {
-      value = std::stoi(prompt_line);
+      p_int = std::stoi(p_line);
     } catch (...) {
-      value = -1;
+      p_int = -1;
     }
-    if ((value < 1) || (value > limit)) std::cout << "\033[F\033[5C\033[K";
-  } while ((value < 1) || (value > limit));
-  return value;
+    if (p_int < 1 || p_int > limit) std::cout << "\033[F\033[5C\033[K";
+  } while (p_int < 1 || p_int > limit);
+  return p_int;
 }
 
 void Grid::Mines(bool overflow) {
