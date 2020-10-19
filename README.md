@@ -1,6 +1,11 @@
 ## Nano-Minesweeper
 
+#### Notes
+
+There are many things done here simply to make the code very compact. It is not written for legibility—it is written in a 'code-golfey' style, but clang-formatted with Google style-guide, and with no #define statements (currently at 141 SLOC).
 A lighter version of a command line minesweeper [game](https://github.com/spinks/MineSweeper).
+
+### Usage
 
 Build with `make` run with `./game`.
 
@@ -39,7 +44,3 @@ Requires C++11.
 	- A **'f'** will flag or un-flag the current cursor location
 	- A **'c'** will cancel the current action (returning to cursor movement)
 	- Anything else (**empty input (enter)**, 'r', etc.) will reveal the current square
-
-#### Notes
-
-There are many things done here simply to make the code very compact. It is not written for legibility.
